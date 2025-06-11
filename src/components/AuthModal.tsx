@@ -1,9 +1,12 @@
 
 import { useState } from "react";
-import { X, Mail, Lock } from "lucide-react";
+import { X, Mail, Lock, Chrome } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -17,22 +20,57 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }: AuthModalProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { signUp, signIn, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Placeholder for Supabase auth integration
-    console.log('Auth attempt:', { mode, email, password });
-    
-    // Simulate loading
-    setTimeout(() => {
+
+    try {
+      if (mode === 'register') {
+        if (password !== confirmPassword) {
+          toast.error('Passwords do not match');
+          setLoading(false);
+          return;
+        }
+        if (password.length < 6) {
+          toast.error('Password must be at least 6 characters long');
+          setLoading(false);
+          return;
+        }
+        
+        const { error } = await signUp(email, password);
+        if (error) {
+          toast.error(error.message || 'Failed to create account');
+        } else {
+          toast.success('Check your email for verification link');
+          onSwitchMode('login');
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast.error(error.message || 'Failed to sign in');
+        } else {
+          toast.success('Successfully signed in!');
+          onClose();
+          navigate('/dashboard');
+        }
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+    } finally {
       setLoading(false);
-      onClose();
-      // Redirect to dashboard would happen here
-    }, 1000);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    const { error } = await signInWithGoogle();
+    if (error) {
+      toast.error(error.message || 'Failed to sign in with Google');
+    }
   };
 
   return (
@@ -85,6 +123,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }: AuthModalProps) => {
                   className="pl-10"
                   placeholder="Enter your password"
                   required
+                  minLength={6}
                 />
               </div>
             </div>
@@ -104,6 +143,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }: AuthModalProps) => {
                     className="pl-10"
                     placeholder="Confirm your password"
                     required
+                    minLength={6}
                   />
                 </div>
               </div>
@@ -118,12 +158,34 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }: AuthModalProps) => {
             </Button>
           </form>
 
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleGoogleSignIn}
+              variant="outline"
+              className="w-full mt-4"
+              disabled={loading}
+            >
+              <Chrome className="h-4 w-4 mr-2" />
+              Google
+            </Button>
+          </div>
+
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
               <button
                 onClick={() => onSwitchMode(mode === 'login' ? 'register' : 'login')}
                 className="text-blue-600 hover:text-blue-700 font-medium"
+                disabled={loading}
               >
                 {mode === 'login' ? 'Sign up' : 'Sign in'}
               </button>

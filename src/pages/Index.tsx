@@ -1,10 +1,10 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, FileText, Check, DollarSign, Users, Download, Star, ArrowRight } from "lucide-react";
+import { FileText, Check, DollarSign, Users, Download, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/hooks/useAuth";
+import Logo from "@/components/Logo";
 import AuthModal from "@/components/AuthModal";
 import PricingModal from "@/components/PricingModal";
 
@@ -12,14 +12,7 @@ const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
-  const { user } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  }, [user, navigate]);
 
   const handleGetStarted = () => {
     setAuthMode('register');
@@ -38,7 +31,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Shield className="h-8 w-8 text-blue-600" />
+              <Logo className="h-8 w-8" />
               <span className="text-2xl font-bold text-gray-900">ProofStack</span>
             </div>
             
@@ -129,7 +122,7 @@ const Index = () => {
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Shield className="h-8 w-8 text-green-600" />
+                  <Logo className="h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Secure & Compliant</h3>
                 <p className="text-gray-600 leading-relaxed">
