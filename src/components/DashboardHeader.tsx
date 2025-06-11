@@ -2,13 +2,14 @@
 import { useState } from "react";
 import { Shield, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const DashboardHeader = () => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const { user, signOut } = useAuth();
 
-  const handleLogout = () => {
-    // Placeholder for Supabase logout
-    console.log('Logging out...');
+  const handleLogout = async () => {
+    await signOut();
   };
 
   return (
@@ -28,7 +29,9 @@ const DashboardHeader = () => {
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-blue-600" />
               </div>
-              <span className="text-sm font-medium text-gray-700">John Doe</span>
+              <span className="text-sm font-medium text-gray-700">
+                {user?.email || 'User'}
+              </span>
             </button>
             
             {showDropdown && (

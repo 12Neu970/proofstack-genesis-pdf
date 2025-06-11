@@ -1,35 +1,46 @@
 
 import { useState } from "react";
-import { Plus, FileText, Download, Calendar, CreditCard } from "lucide-react";
+import { Plus, FileText, Download, Calendar, CreditCard, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardHeader from "@/components/DashboardHeader";
 import NewProofModal from "@/components/NewProofModal";
+import PricingModal from "@/components/PricingModal";
+import { usePaymentProofs } from "@/hooks/usePaymentProofs";
+import { format } from "date-fns";
 
 const Dashboard = () => {
   const [showNewProof, setShowNewProof] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
+  const { proofs, loading } = usePaymentProofs();
   
-  // Mock data - would come from Supabase
-  const proofs = [
-    {
-      id: 1,
-      title: "Visa Application Payment",
-      amount: "$2,500",
-      method: "PayPal",
-      date: "2024-06-10",
-      status: "completed",
-      type: "Visa Application"
-    },
-    {
-      id: 2,
-      title: "Rent Payment June",
-      amount: "$1,200",
-      method: "Flutterwave",
-      date: "2024-06-01",
-      status: "completed",
-      type: "Rent"
+  const totalProofs = proofs.length;
+  const paidProofs = proofs.filter(proof => proof.is_paid).length;
+  const thisMonthProofs = proofs.filter(proof => {
+    const proofDate = new Date(proof.created_at);
+    const now = new Date();
+    return proofDate.getMonth() === now.getMonth() && proofDate.getFullYear() === now.getFullYear();
+  }).length;
+
+  const handleDownload = (proof: any) => {
+    if (!proof.is_paid) {
+      setShowPricing(true);
+      return;
     }
-  ];
+    
+    // Handle PDF download for paid proofs
+    if (proof.proof_pdf) {
+      window.open(proof.proof_pdf, '_blank');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,7 +55,7 @@ const Dashboard = () => {
                 <FileText className="h-8 w-8 text-blue-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Proofs</p>
-                  <p className="text-2xl font-bold text-gray-900">12</p>
+                  <p className="text-2xl font-bold text-gray-900">{totalProofs}</p>
                 </div>
               </div>
             </CardContent>
@@ -55,8 +66,8 @@ const Dashboard = () => {
               <div className="flex items-center">
                 <Download className="h-8 w-8 text-green-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Downloads</p>
-                  <p className="text-2xl font-bold text-gray-900">8</p>
+                  <p className="text-sm font-medium text-gray-600">Paid Downloads</p>
+                  <p className="text-2xl font-bold text-gray-900">{paidProofs}</p>
                 </div>
               </div>
             </CardContent>
@@ -68,7 +79,7 @@ const Dashboard = () => {
                 <Calendar className="h-8 w-8 text-purple-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">This Month</p>
-                  <p className="text-2xl font-bold text-gray-900">3</p>
+                  <p className="text-2xl font-bold text-gray-900">{thisMonthProofs}</p>
                 </div>
               </div>
             </CardContent>
@@ -118,13 +129,17 @@ const Dashboard = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {proofs.map((proof) => (
-              <Card key={proof.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Card key={proof.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle className="text-lg">{proof.title}</CardTitle>
+                  <CardTitle className="text-lg">{proof.sender_name} → {proof.receiver_name}</CardTitle>
                   <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>{proof.type}</span>
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      {proof.status}
+                    <span>{proof.proof_type}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      proof.is_paid 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {proof.is_paid ? 'Paid' : 'Free'}
                     </span>
                   </div>
                 </CardHeader>
@@ -132,25 +147,42 @@ const Dashboard = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Amount:</span>
-                      <span className="font-medium">{proof.amount}</span>
+                      <span className="font-medium">${proof.amount}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Method:</span>
-                      <span className="font-medium">{proof.method}</span>
+                      <span className="font-medium">{proof.payment_method}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Date:</span>
-                      <span className="font-medium">{proof.date}</span>
+                      <span className="font-medium">
+                        {format(new Date(proof.payment_date), 'MMM dd, yyyy')}
+                      </span>
                     </div>
                   </div>
                   <div className="mt-4 flex space-x-2">
                     <Button size="sm" variant="outline" className="flex-1">
                       View
                     </Button>
-                    <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
+                    {proof.is_paid ? (
+                      <Button 
+                        size="sm" 
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        onClick={() => handleDownload(proof)}
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        Download
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        className="flex-1 bg-orange-600 hover:bg-orange-700"
+                        onClick={() => setShowPricing(true)}
+                      >
+                        <DollarSign className="h-4 w-4 mr-1" />
+                        Upgrade
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -162,6 +194,11 @@ const Dashboard = () => {
       <NewProofModal 
         isOpen={showNewProof} 
         onClose={() => setShowNewProof(false)} 
+      />
+      
+      <PricingModal 
+        isOpen={showPricing} 
+        onClose={() => setShowPricing(false)} 
       />
     </div>
   );

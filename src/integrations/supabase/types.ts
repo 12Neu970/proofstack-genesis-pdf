@@ -9,7 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      payment_proofs: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          is_paid: boolean
+          payment_date: string
+          payment_method: Database["public"]["Enums"]["payment_method_enum"]
+          proof_pdf: string | null
+          proof_type: Database["public"]["Enums"]["proof_type_enum"]
+          receiver_name: string
+          sender_name: string
+          transaction_image: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          is_paid?: boolean
+          payment_date: string
+          payment_method: Database["public"]["Enums"]["payment_method_enum"]
+          proof_pdf?: string | null
+          proof_type: Database["public"]["Enums"]["proof_type_enum"]
+          receiver_name: string
+          sender_name: string
+          transaction_image?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          is_paid?: boolean
+          payment_date?: string
+          payment_method?: Database["public"]["Enums"]["payment_method_enum"]
+          proof_pdf?: string | null
+          proof_type?: Database["public"]["Enums"]["proof_type_enum"]
+          receiver_name?: string
+          sender_name?: string
+          transaction_image?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +65,22 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      payment_method_enum:
+        | "Flutterwave"
+        | "Binance"
+        | "PayPal"
+        | "Bank Transfer"
+        | "Wise"
+        | "Remitly"
+        | "WorldRemit"
+        | "Other"
+      proof_type_enum:
+        | "Visa Application"
+        | "Rent Payment"
+        | "Tax Documentation"
+        | "Contract Payment"
+        | "Freelance Work"
+        | "Other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +195,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      payment_method_enum: [
+        "Flutterwave",
+        "Binance",
+        "PayPal",
+        "Bank Transfer",
+        "Wise",
+        "Remitly",
+        "WorldRemit",
+        "Other",
+      ],
+      proof_type_enum: [
+        "Visa Application",
+        "Rent Payment",
+        "Tax Documentation",
+        "Contract Payment",
+        "Freelance Work",
+        "Other",
+      ],
+    },
   },
 } as const
