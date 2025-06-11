@@ -25,23 +25,37 @@ const Auth = () => {
       if (mode === 'register') {
         if (password !== confirmPassword) {
           toast.error('Passwords do not match');
+          setLoading(false);
           return;
         }
+        if (password.length < 6) {
+          toast.error('Password must be at least 6 characters long');
+          setLoading(false);
+          return;
+        }
+        
+        console.log('Attempting signup with:', { email, password: '***' });
         const { error } = await signUp(email, password);
         if (error) {
-          toast.error(error.message);
+          console.error('Signup error:', error);
+          toast.error(error.message || 'Failed to create account');
         } else {
           toast.success('Check your email for verification link');
+          setMode('login');
         }
       } else {
+        console.log('Attempting login with:', { email, password: '***' });
         const { error } = await signIn(email, password);
         if (error) {
-          toast.error(error.message);
+          console.error('Login error:', error);
+          toast.error(error.message || 'Failed to sign in');
         } else {
+          toast.success('Successfully signed in!');
           navigate('/dashboard');
         }
       }
     } catch (error) {
+      console.error('Auth error:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -49,9 +63,11 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    console.log('Attempting Google sign in');
     const { error } = await signInWithGoogle();
     if (error) {
-      toast.error(error.message);
+      console.error('Google sign in error:', error);
+      toast.error(error.message || 'Failed to sign in with Google');
     }
   };
 
@@ -97,6 +113,7 @@ const Auth = () => {
                 className="pl-10"
                 placeholder="Enter your password"
                 required
+                minLength={6}
               />
             </div>
           </div>
@@ -114,6 +131,7 @@ const Auth = () => {
                   className="pl-10"
                   placeholder="Confirm your password"
                   required
+                  minLength={6}
                 />
               </div>
             </div>
@@ -142,6 +160,7 @@ const Auth = () => {
             onClick={handleGoogleSignIn}
             variant="outline"
             className="w-full mt-4"
+            disabled={loading}
           >
             <Chrome className="h-4 w-4 mr-2" />
             Google
@@ -154,6 +173,7 @@ const Auth = () => {
             <button
               onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
               className="text-blue-600 hover:text-blue-700 font-medium"
+              disabled={loading}
             >
               {mode === 'login' ? 'Sign up' : 'Sign in'}
             </button>

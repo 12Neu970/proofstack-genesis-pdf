@@ -3,18 +3,22 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+export type PaymentMethod = 'Flutterwave' | 'Binance' | 'PayPal' | 'Bank Transfer' | 'Wise' | 'Remitly' | 'WorldRemit' | 'Other';
+export type ProofType = 'Visa Application' | 'Rent Payment' | 'Tax Documentation' | 'Contract Payment' | 'Freelance Work' | 'Other';
+
 export interface PaymentProof {
   id: string;
-  proof_type: string;
+  proof_type: ProofType;
   sender_name: string;
   receiver_name: string;
   amount: number;
-  payment_method: string;
+  payment_method: PaymentMethod;
   payment_date: string;
   transaction_image?: string;
   proof_pdf?: string;
   is_paid: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export function usePaymentProofs() {
@@ -43,7 +47,7 @@ export function usePaymentProofs() {
     fetchProofs();
   }, [user]);
 
-  const createProof = async (proofData: Omit<PaymentProof, 'id' | 'created_at' | 'is_paid'>) => {
+  const createProof = async (proofData: Omit<PaymentProof, 'id' | 'created_at' | 'updated_at' | 'is_paid'>) => {
     if (!user) return null;
 
     const { data, error } = await supabase
