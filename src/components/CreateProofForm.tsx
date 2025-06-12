@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { usePaymentProofs } from "@/hooks/usePaymentProofs";
+import { usePaymentProofs, PaymentMethod } from "@/hooks/usePaymentProofs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,7 +25,7 @@ export interface ProofFormData {
   amount: string;
   currency: string;
   purpose: string;
-  payment_method: string;
+  payment_method: PaymentMethod;
   payment_date: Date | undefined;
 }
 
@@ -36,7 +36,7 @@ const CreateProofForm = ({ isOpen, onClose }: CreateProofFormProps) => {
     amount: "",
     currency: "USD",
     purpose: "",
-    payment_method: "",
+    payment_method: "Flutterwave",
     payment_date: undefined,
   });
 
@@ -134,7 +134,7 @@ const CreateProofForm = ({ isOpen, onClose }: CreateProofFormProps) => {
       amount: "",
       currency: "USD",
       purpose: "",
-      payment_method: "",
+      payment_method: "Flutterwave",
       payment_date: undefined,
     });
     setSubmittedProofId(null);
@@ -217,7 +217,7 @@ const CreateProofForm = ({ isOpen, onClose }: CreateProofFormProps) => {
 
                 <div>
                   <Label>Payment Method</Label>
-                  <Select value={formData.payment_method} onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}>
+                  <Select value={formData.payment_method} onValueChange={(value: PaymentMethod) => setFormData(prev => ({ ...prev, payment_method: value }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select method" />
                     </SelectTrigger>
