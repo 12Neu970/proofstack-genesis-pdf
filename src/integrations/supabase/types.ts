@@ -13,12 +13,17 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string | null
+          flutterwave_tx_id: string | null
+          flutterwave_tx_ref: string | null
           id: string
           is_paid: boolean
           payment_date: string
           payment_method: Database["public"]["Enums"]["payment_method_enum"]
+          payment_status: string | null
           proof_pdf: string | null
           proof_type: Database["public"]["Enums"]["proof_type_enum"]
+          purpose: string | null
           receiver_name: string
           sender_name: string
           transaction_image: string | null
@@ -28,12 +33,17 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          currency?: string | null
+          flutterwave_tx_id?: string | null
+          flutterwave_tx_ref?: string | null
           id?: string
           is_paid?: boolean
           payment_date: string
           payment_method: Database["public"]["Enums"]["payment_method_enum"]
+          payment_status?: string | null
           proof_pdf?: string | null
           proof_type: Database["public"]["Enums"]["proof_type_enum"]
+          purpose?: string | null
           receiver_name: string
           sender_name: string
           transaction_image?: string | null
@@ -43,12 +53,17 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          currency?: string | null
+          flutterwave_tx_id?: string | null
+          flutterwave_tx_ref?: string | null
           id?: string
           is_paid?: boolean
           payment_date?: string
           payment_method?: Database["public"]["Enums"]["payment_method_enum"]
+          payment_status?: string | null
           proof_pdf?: string | null
           proof_type?: Database["public"]["Enums"]["proof_type_enum"]
+          purpose?: string | null
           receiver_name?: string
           sender_name?: string
           transaction_image?: string | null
