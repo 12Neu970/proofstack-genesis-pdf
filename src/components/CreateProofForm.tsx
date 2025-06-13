@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { usePaymentProofs, PaymentMethod } from "@/hooks/usePaymentProofs";
+import { usePaymentProofs, PaymentMethod, ProofType } from "@/hooks/usePaymentProofs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,6 +25,7 @@ export interface ProofFormData {
   amount: string;
   currency: string;
   purpose: string;
+  proof_type: ProofType;
   payment_method: PaymentMethod;
   payment_date: Date | undefined;
 }
@@ -36,6 +37,7 @@ const CreateProofForm = ({ isOpen, onClose }: CreateProofFormProps) => {
     amount: "",
     currency: "USD",
     purpose: "",
+    proof_type: "Visa Application",
     payment_method: "Flutterwave",
     payment_date: undefined,
   });
@@ -72,7 +74,7 @@ const CreateProofForm = ({ isOpen, onClose }: CreateProofFormProps) => {
         purpose: formData.purpose,
         payment_method: formData.payment_method,
         payment_date: format(formData.payment_date, 'yyyy-MM-dd'),
-        proof_type: 'Other' as const,
+        proof_type: formData.proof_type,
       };
 
       const result = await createProof(proofData);
@@ -134,6 +136,7 @@ const CreateProofForm = ({ isOpen, onClose }: CreateProofFormProps) => {
       amount: "",
       currency: "USD",
       purpose: "",
+      proof_type: "Visa Application",
       payment_method: "Flutterwave",
       payment_date: undefined,
     });
@@ -162,6 +165,23 @@ const CreateProofForm = ({ isOpen, onClose }: CreateProofFormProps) => {
 
           {!submittedProofId ? (
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <Label>Proof Type</Label>
+                <Select value={formData.proof_type} onValueChange={(value: ProofType) => setFormData(prev => ({ ...prev, proof_type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="What type of proof do you need?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Visa Application">Visa Application</SelectItem>
+                    <SelectItem value="Rent Payment">Rent Payment</SelectItem>
+                    <SelectItem value="Tax Documentation">Tax Documentation</SelectItem>
+                    <SelectItem value="Contract Payment">Contract Payment</SelectItem>
+                    <SelectItem value="Freelance Work">Freelance Work</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="payer_name">Payer Name</Label>
@@ -310,6 +330,7 @@ const CreateProofForm = ({ isOpen, onClose }: CreateProofFormProps) => {
               <div className="space-y-4">
                 <h4 className="font-medium text-gray-900">Proof Details:</h4>
                 <div className="bg-gray-50 rounded-lg p-4 text-left space-y-2 text-sm">
+                  <div><strong>Type:</strong> {formData.proof_type}</div>
                   <div><strong>Payer:</strong> {formData.payer_name}</div>
                   <div><strong>Receiver:</strong> {formData.receiver_name}</div>
                   <div><strong>Amount:</strong> {formData.currency} {formData.amount}</div>
